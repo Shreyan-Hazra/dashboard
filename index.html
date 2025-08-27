@@ -3,261 +3,206 @@
 <head>
   <meta charset="UTF-8">
   <title>My Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    :root {
-      --bg: #121212;
-      --card-bg: #1e1e1e;
-      --text: #e0e0e0;
-      --accent: #4CAF50;
-      --danger: #e74c3c;
-    }
     body {
+      font-family: Arial, sans-serif;
       margin: 0;
-      padding: 20px;
-      font-family: 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      padding: 0;
+      background-color: #121212;
+      color: #f1f1f1;
+    }
+    header {
+      text-align: center;
+      padding: 1rem;
+      background-color: #1e1e1e;
+      font-size: 1.5rem;
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    main {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-      min-height: 100vh;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      padding: 1.5rem;
     }
-    h1, h2 {
-      margin: 0 0 10px;
-      font-weight: 500;
+    section {
+      background-color: #1e1e1e;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.6);
     }
-    h1 {
-      font-size: 2.5rem;
-      text-align: center;
-    }
-    .card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-      display: flex;
-      flex-direction: column;
-    }
-    .header-card {
-      grid-column: 1 / -1;
-      text-align: center;
-    }
-    #clock {
+    h2 {
+      margin-top: 0;
       font-size: 1.2rem;
-      color: #bbb;
+      border-bottom: 1px solid #333;
+      padding-bottom: 0.5rem;
+    }
+    input, button {
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      border: none;
+      border-radius: 8px;
+    }
+    input {
+      width: 70%;
+    }
+    button {
+      background-color: #0078d7;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #005fa3;
     }
     ul {
       list-style: none;
       padding: 0;
-      margin: 0;
     }
     li {
-      margin: 8px 0;
+      padding: 0.5rem;
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #333;
     }
-    a {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 500;
-      transition: 0.2s;
-    }
-    a:hover {
-      color: #6cf;
-    }
-    input {
-      background: #2a2a2a;
-      border: none;
-      padding: 10px;
-      border-radius: 8px;
-      color: var(--text);
-      margin-top: 10px;
-      width: calc(50% - 10px);
-    }
-    button {
-      background: var(--accent);
-      border: none;
-      padding: 10px 15px;
-      border-radius: 8px;
-      color: white;
+    li span {
+      flex-grow: 1;
       cursor: pointer;
-      margin-top: 10px;
-      transition: 0.2s;
     }
-    button:hover {
-      background: #66bb6a;
+    li.done span {
+      text-decoration: line-through;
+      color: #888;
     }
     .delete-btn {
-      background: var(--danger);
-      margin-left: 10px;
-      padding: 4px 8px;
+      background: none;
+      color: #f44336;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
     }
-    .delete-btn:hover {
-      background: #ff6b6b;
+    a {
+      color: #4da6ff;
+      text-decoration: none;
     }
-    .small-text {
-      font-size: 0.9rem;
-      color: #aaa;
+    a:hover {
+      text-decoration: underline;
+    }
+    @media (max-width: 768px) {
+      main {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <div class="card header-card">
-    <h1>👋 Welcome Back</h1>
-    <div id="clock"></div>
-  </div>
+  <header>🚀 My Custom Dashboard</header>
+  <main>
+    <!-- Tasks Section -->
+    <section>
+      <h2>✅ Tasks</h2>
+      <input type="text" id="taskInput" placeholder="New task...">
+      <button onclick="addTask()">Add</button>
+      <ul id="taskList"></ul>
+    </section>
 
-  <!-- Calendar -->
-  <div class="card">
-    <h2>📅 Today’s Events</h2>
-    <ul id="events"></ul>
-  </div>
-
-  <!-- Weather -->
-  <div class="card">
-    <h2>☀️ Weather</h2>
-    <div id="weather" class="small-text">Loading...</div>
-  </div>
-
-  <!-- Gmail -->
-  <div class="card">
-    <h2>📧 Gmail</h2>
-    <div id="gmail">Loading...</div>
-    <ul id="emails"></ul>
-  </div>
-
-  <!-- Bookmarks -->
-  <div class="card">
-    <h2>📑 Bookmarks</h2>
-    <ul id="bookmarks"></ul>
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-      <input id="bmName" type="text" placeholder="Name">
-      <input id="bmURL" type="url" placeholder="https://example.com">
-      <button onclick="addNewBookmark()">Add</button>
-    </div>
-  </div>
-
-  <!-- To-Do List -->
-  <div class="card">
-    <h2>✅ To-Do List</h2>
-    <ul id="tasks"></ul>
-    <div style="display:flex; gap:10px;">
-      <input id="newTask" type="text" placeholder="Add a new task" style="flex:1;">
-      <button onclick="addNewTask()">Add</button>
-    </div>
-  </div>
+    <!-- Bookmarks Section -->
+    <section>
+      <h2>🔖 Bookmarks</h2>
+      <input type="text" id="bookmarkName" placeholder="Name">
+      <input type="url" id="bookmarkURL" placeholder="https://...">
+      <button onclick="addBookmark()">Add</button>
+      <ul id="bookmarkList"></ul>
+    </section>
+  </main>
 
   <script>
-    // Clock
-    function updateClock() {
-      const now = new Date();
-      document.getElementById("clock").textContent = 
-        now.toLocaleString([], {weekday:'long', hour: '2-digit', minute:'2-digit', second:'2-digit'});
-    }
-    setInterval(updateClock, 1000); updateClock();
+    // === TASKS ===
+    const taskInput = document.getElementById("taskInput");
+    const taskList = document.getElementById("taskList");
 
-    // Calendar
-    google.script.run.withSuccessHandler(function(events) {
-      let list = document.getElementById("events");
-      if (events.length === 0) list.innerHTML = "<li>No events today 🎉</li>";
-      else events.forEach(e => {
-        let li = document.createElement("li");
-        li.innerHTML = `<span>${e.title}</span> <span class="small-text">${new Date(e.start).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>`;
-        list.appendChild(li);
-      });
-    }).getEvents();
-
-    // Weather (OpenWeatherMap)
-    const API_KEY = "PUT_YOUR_OPENWEATHERMAP_API_KEY";
-    fetch(`https://api.openweathermap.org/data/2.5/weather?q=Kolkata&appid=${API_KEY}&units=metric`)
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("weather").textContent = 
-          `${data.name}: ${data.main.temp}°C, ${data.weather[0].description}`;
-      });
-
-    // Gmail
-    google.script.run.withSuccessHandler(function(emails) {
-      let gmailDiv = document.getElementById("gmail");
-      let emailList = document.getElementById("emails");
-
-      if (emails.length === 0) {
-        gmailDiv.textContent = "🎉 No unread emails!";
-        return;
-      }
-
-      gmailDiv.textContent = `You have ${emails.length} unread emails:`;
-      emailList.innerHTML = "";
-
-      emails.forEach(e => {
-        let li = document.createElement("li");
-        let link = document.createElement("a");
-        link.href = `https://mail.google.com/mail/u/0/#inbox/${e.id}`;
-        link.target = "_blank";
-        link.innerHTML = `<strong>${e.subject}</strong> — <em>${e.from}</em>`;
-        li.appendChild(link);
-        emailList.appendChild(li);
-      });
-    }).getUnreadEmails();
-
-    // Tasks
     function loadTasks() {
-      google.script.run.withSuccessHandler(function(tasks) {
-        let list = document.getElementById("tasks");
-        list.innerHTML = "";
-        tasks.forEach((t, i) => {
-          let li = document.createElement("li");
-          li.innerHTML = `<label><input type="checkbox" ${t.done ? "checked" : ""} onchange="toggleTask(${i})"> ${t.task}</label>`;
-          list.appendChild(li);
-        });
-      }).getTasks();
+      const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+      taskList.innerHTML = "";
+      tasks.forEach((t, i) => {
+        const li = document.createElement("li");
+        li.className = t.done ? "done" : "";
+        const span = document.createElement("span");
+        span.textContent = t.text;
+        span.onclick = () => toggleTask(i);
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "✕";
+        delBtn.className = "delete-btn";
+        delBtn.onclick = () => deleteTask(i);
+        li.appendChild(span);
+        li.appendChild(delBtn);
+        taskList.appendChild(li);
+      });
     }
-    function addNewTask() {
-      const task = document.getElementById("newTask").value;
-      if (!task) return;
-      google.script.run.withSuccessHandler(loadTasks).addTask(task);
-      document.getElementById("newTask").value = "";
+    function addTask() {
+      const text = taskInput.value.trim();
+      if (!text) return;
+      const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+      tasks.push({ text, done: false });
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+      taskInput.value = "";
+      loadTasks();
     }
-    function toggleTask(i) {
-      google.script.run.withSuccessHandler(loadTasks).toggleTask(i);
+    function toggleTask(index) {
+      const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+      tasks[index].done = !tasks[index].done;
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+      loadTasks();
     }
-    loadTasks();
+    function deleteTask(index) {
+      const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+      tasks.splice(index, 1);
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+      loadTasks();
+    }
 
-    // Bookmarks
+    // === BOOKMARKS ===
+    const bookmarkList = document.getElementById("bookmarkList");
+
     function loadBookmarks() {
-      google.script.run.withSuccessHandler(function(links) {
-        let list = document.getElementById("bookmarks");
-        list.innerHTML = "";
-        links.forEach(b => {
-          let li = document.createElement("li");
-          let a = document.createElement("a");
-          a.href = b.url;
-          a.textContent = b.name;
-          a.target = "_blank";
-
-          let del = document.createElement("button");
-          del.textContent = "❌";
-          del.className = "delete-btn";
-          del.onclick = function() {
-            google.script.run.withSuccessHandler(loadBookmarks).deleteBookmark(b.row);
-          };
-
-          li.appendChild(a);
-          li.appendChild(del);
-          list.appendChild(li);
-        });
-      }).getBookmarks();
+      const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
+      bookmarkList.innerHTML = "";
+      bookmarks.forEach((b, i) => {
+        const li = document.createElement("li");
+        const link = document.createElement("a");
+        link.href = b.url;
+        link.target = "_blank";
+        link.textContent = b.name;
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "✕";
+        delBtn.className = "delete-btn";
+        delBtn.onclick = () => deleteBookmark(i);
+        li.appendChild(link);
+        li.appendChild(delBtn);
+        bookmarkList.appendChild(li);
+      });
     }
-    function addNewBookmark() {
-      const name = document.getElementById("bmName").value;
-      const url = document.getElementById("bmURL").value;
+    function addBookmark() {
+      const name = document.getElementById("bookmarkName").value.trim();
+      const url = document.getElementById("bookmarkURL").value.trim();
       if (!name || !url) return;
-      google.script.run.withSuccessHandler(loadBookmarks).addBookmark(name, url);
-      document.getElementById("bmName").value = "";
-      document.getElementById("bmURL").value = "";
+      const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
+      bookmarks.push({ name, url });
+      localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
+      document.getElementById("bookmarkName").value = "";
+      document.getElementById("bookmarkURL").value = "";
+      loadBookmarks();
     }
+    function deleteBookmark(index) {
+      const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
+      bookmarks.splice(index, 1);
+      localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
+      loadBookmarks();
+    }
+
+    // Init
+    loadTasks();
     loadBookmarks();
   </script>
 </body>
