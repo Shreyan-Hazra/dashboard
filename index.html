@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Dashboard</title>
+  <style>
+    :root {
+      --bg: #121212;
+      --card-bg: #1e1e1e;
+      --text: #e0e0e0;
+      --accent: #4CAF50;
+      --danger: #e74c3c;
+    }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      min-height: 100vh;
+    }
+    h1, h2 {
+      margin: 0 0 10px;
+      font-weight: 500;
+    }
+    h1 {
+      font-size: 2.5rem;
+      text-align: center;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+    }
+    .header-card {
+      grid-column: 1 / -1;
+      text-align: center;
+    }
+    #clock {
+      font-size: 1.2rem;
+      color: #bbb;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    li {
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+      transition: 0.2s;
+    }
+    a:hover {
+      color: #6cf;
+    }
+    input {
+      background: #2a2a2a;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      color: var(--text);
+      margin-top: 10px;
+      width: calc(50% - 10px);
+    }
+    button {
+      background: var(--accent);
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #66bb6a;
+    }
+    .delete-btn {
+      background: var(--danger);
+      margin-left: 10px;
+      padding: 4px 8px;
+    }
+    .delete-btn:hover {
+      background: #ff6b6b;
+    }
+    .small-text {
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="card header-card">
+    <h1>👋 Welcome Back</h1>
+    <div id="clock"></div>
+  </div>
+
+  <!-- Calendar -->
+  <div class="card">
+    <h2>📅 Today’s Events</h2>
+    <ul id="events"></ul>
+  </div>
+
+  <!-- Weather -->
+  <div class="card">
+    <h2>☀️ Weather</h2>
+    <div id="weather" class="small-text">Loading...</div>
+  </div>
+
+  <!-- Gmail -->
+  <div class="card">
+    <h2>📧 Gmail</h2>
+    <div id="gmail">Loading...</div>
+    <ul id="emails"></ul>
+  </div>
+
+  <!-- Bookmarks -->
+  <div class="card">
+    <h2>📑 Bookmarks</h2>
+    <ul id="bookmarks"></ul>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <input id="bmName" type="text" placeholder="Name">
+      <input id="bmURL" type="url" placeholder="https://example.com">
+      <button onclick="addNewBookmark()">Add</button>
+    </div>
+  </div>
+
+  <!-- To-Do List -->
+  <div class="card">
+    <h2>✅ To-Do List</h2>
+    <ul id="tasks"></ul>
+    <div style="display:flex; gap:10px;">
+      <input id="newTask" type="text" placeholder="Add a new task" style="flex:1;">
+      <button onclick="addNewTask()">Add</button>
+    </div>
+  </div>
+
+  <script>
+    // Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById("clock").textContent = 
+        now.toLocaleString([], {weekday:'long', hour: '2-digit', minute:'2-digit', second:'2-digit'});
+    }
+    setInterval(updateClock, 1000); updateClock();
+
+    // Calendar
+    google.script.run.withSuccessHandler(function(events) {
+      let list = document.getElementById("events");
+      if (events.length === 0) list.innerHTML = "<li>No events today 🎉</li>";
+      else events.forEach(e => {
+        let li = document.createElement("li");
+        li.innerHTML = `<span>${e.title}</span> <span class="small-text">${new Date(e.start).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>`;
+        list.appendChild(li);
+      });
+    }).getEvents();
+
+    // Weather (OpenWeatherMap)
+    const API_KEY = "PUT_YOUR_OPENWEATHERMAP_API_KEY";
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=Kolkata&appid=${API_KEY}&units=metric`)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("weather").textContent = 
+          `${data.name}: ${data.main.temp}°C, ${data.weather[0].description}`;
+      });
+
+    // Gmail
+    google.script.run.withSuccessHandler(function(emails) {
+      let gmailDiv = document.getElementById("gmail");
+      let emailList = document.getElementById("emails");
+
+      if (emails.length === 0) {
+        gmailDiv.textContent = "🎉 No unread emails!";
+        return;
+      }
+
+      gmailDiv.textContent = `You have ${emails.length} unread emails:`;
+      emailList.innerHTML = "";
+
+      emails.forEach(e => {
+        let li = document.createElement("li");
+        let link = document.createElement("a");
+        link.href = `https://mail.google.com/mail/u/0/#inbox/${e.id}`;
+        link.target = "_blank";
+        link.innerHTML = `<strong>${e.subject}</strong> — <em>${e.from}</em>`;
+        li.appendChild(link);
+        emailList.appendChild(li);
+      });
+    }).getUnreadEmails();
+
+    // Tasks
+    function loadTasks() {
+      google.script.run.withSuccessHandler(function(tasks) {
+        let list = document.getElementById("tasks");
+        list.innerHTML = "";
+        tasks.forEach((t, i) => {
+          let li = document.createElement("li");
+          li.innerHTML = `<label><input type="checkbox" ${t.done ? "checked" : ""} onchange="toggleTask(${i})"> ${t.task}</label>`;
+          list.appendChild(li);
+        });
+      }).getTasks();
+    }
+    function addNewTask() {
+      const task = document.getElementById("newTask").value;
+      if (!task) return;
+      google.script.run.withSuccessHandler(loadTasks).addTask(task);
+      document.getElementById("newTask").value = "";
+    }
+    function toggleTask(i) {
+      google.script.run.withSuccessHandler(loadTasks).toggleTask(i);
+    }
+    loadTasks();
+
+    // Bookmarks
+    function loadBookmarks() {
+      google.script.run.withSuccessHandler(function(links) {
+        let list = document.getElementById("bookmarks");
+        list.innerHTML = "";
+        links.forEach(b => {
+          let li = document.createElement("li");
+          let a = document.createElement("a");
+          a.href = b.url;
+          a.textContent = b.name;
+          a.target = "_blank";
+
+          let del = document.createElement("button");
+          del.textContent = "❌";
+          del.className = "delete-btn";
+          del.onclick = function() {
+            google.script.run.withSuccessHandler(loadBookmarks).deleteBookmark(b.row);
+          };
+
+          li.appendChild(a);
+          li.appendChild(del);
+          list.appendChild(li);
+        });
+      }).getBookmarks();
+    }
+    function addNewBookmark() {
+      const name = document.getElementById("bmName").value;
+      const url = document.getElementById("bmURL").value;
+      if (!name || !url) return;
+      google.script.run.withSuccessHandler(loadBookmarks).addBookmark(name, url);
+      document.getElementById("bmName").value = "";
+      document.getElementById("bmURL").value = "";
+    }
+    loadBookmarks();
+  </script>
+</body>
+</html>
