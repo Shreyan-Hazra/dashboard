@@ -1,207 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>My Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
-      background-color: #121212;
-      color: #f1f1f1;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: #121212;
+      color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
     }
-    header {
-      text-align: center;
-      padding: 1rem;
-      background-color: #1e1e1e;
-      font-size: 1.5rem;
-      font-weight: bold;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-    }
-    main {
+    h1, h2 { margin: 10px 0; text-align: center; color: #ffffff; }
+    .container {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      padding: 1.5rem;
+      gap: 20px;
+      width: 90%;
+      max-width: 1000px;
+      margin-top: 20px;
     }
-    section {
-      background-color: #1e1e1e;
-      border-radius: 12px;
-      padding: 1rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.6);
-    }
-    h2 {
-      margin-top: 0;
-      font-size: 1.2rem;
-      border-bottom: 1px solid #333;
-      padding-bottom: 0.5rem;
+    .card {
+      background: #1e1e1e;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
     }
     input, button {
-      padding: 0.5rem;
-      margin-top: 0.5rem;
+      padding: 10px;
       border: none;
       border-radius: 8px;
+      margin: 5px 0;
+      font-size: 14px;
     }
     input {
-      width: 70%;
+      background: #2a2a2a;
+      color: #f0f0f0;
     }
     button {
-      background-color: #0078d7;
-      color: #fff;
+      background: #6200ea;
+      color: white;
       cursor: pointer;
       transition: background 0.3s;
     }
-    button:hover {
-      background-color: #005fa3;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-    }
+    button:hover { background: #3700b3; }
+    ul { list-style: none; padding: 0; margin: 10px 0 0 0; }
     li {
-      padding: 0.5rem;
+      padding: 8px 10px;
+      background: #2a2a2a;
+      border-radius: 8px;
+      margin-bottom: 6px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #333;
-    }
-    li span {
-      flex-grow: 1;
       cursor: pointer;
+      transition: background 0.3s;
     }
+    li:hover { background: #333; }
     li.done span {
       text-decoration: line-through;
-      color: #888;
+      color: #999;
     }
     .delete-btn {
-      background: none;
+      background: transparent;
+      border: none;
       color: #f44336;
       font-weight: bold;
-      border: none;
       cursor: pointer;
+      font-size: 16px;
     }
-    a {
-      color: #4da6ff;
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
+    a { color: #bb86fc; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .time {
+      font-size: 2.5em;
+      font-weight: bold;
+      margin: 20px 0;
     }
     @media (max-width: 768px) {
-      main {
-        grid-template-columns: 1fr;
-      }
+      .container { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <header>🚀 My Custom Dashboard</header>
-  <main>
-    <!-- Tasks Section -->
-    <section>
-      <h2>✅ Tasks</h2>
-      <input type="text" id="taskInput" placeholder="New task...">
-      <button onclick="addTask()">Add</button>
+  <h1>📌 My Custom Dashboard</h1>
+  <div class="time" id="time"></div>
+  
+  <div class="container">
+    <!-- Tasks -->
+    <div class="card">
+      <h2>✅ To-Do List</h2>
+      <input id="taskInput" placeholder="Add new task..." />
+      <button onclick="addTask()">Add Task</button>
       <ul id="taskList"></ul>
-    </section>
-
-    <!-- Bookmarks Section -->
-    <section>
+    </div>
+    
+    <!-- Bookmarks -->
+    <div class="card">
       <h2>🔖 Bookmarks</h2>
-      <input type="text" id="bookmarkName" placeholder="Name">
-      <input type="url" id="bookmarkURL" placeholder="https://...">
-      <button onclick="addBookmark()">Add</button>
+      <input id="bookmarkName" placeholder="Bookmark name..." />
+      <input id="bookmarkURL" placeholder="Bookmark URL..." />
+      <button onclick="addBookmark()">Add Bookmark</button>
       <ul id="bookmarkList"></ul>
-    </section>
-  </main>
+    </div>
+  </div>
 
   <script>
-    // === TASKS ===
-    const taskInput = document.getElementById("taskInput");
-    const taskList = document.getElementById("taskList");
+    // Replace this with your Google Apps Script Web App URL
+    const API_URL = "YOUR_SCRIPT_URL_HERE";
 
-    function loadTasks() {
-      const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+    // === CLOCK ===
+    function updateTime() {
+      document.getElementById("time").textContent = new Date().toLocaleTimeString();
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+
+    // === TASKS ===
+    async function loadTasks() {
+      const res = await fetch(`${API_URL}?sheet=Tasks`);
+      const tasks = await res.json();
+      const taskList = document.getElementById("taskList");
       taskList.innerHTML = "";
       tasks.forEach((t, i) => {
         const li = document.createElement("li");
-        li.className = t.done ? "done" : "";
+        li.className = t.Done === "TRUE" ? "done" : "";
         const span = document.createElement("span");
-        span.textContent = t.text;
-        span.onclick = () => toggleTask(i);
+        span.textContent = t.Task;
+        span.onclick = () => toggleTask(i, tasks);
         const delBtn = document.createElement("button");
         delBtn.textContent = "✕";
         delBtn.className = "delete-btn";
-        delBtn.onclick = () => deleteTask(i);
+        delBtn.onclick = () => deleteTask(i, tasks);
         li.appendChild(span);
         li.appendChild(delBtn);
         taskList.appendChild(li);
       });
     }
+    async function saveTasks(tasks) {
+      await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ sheet: "Tasks", data: tasks.map(t => ({ text: t.Task, done: t.Done })) })
+      });
+      loadTasks();
+    }
     function addTask() {
-      const text = taskInput.value.trim();
+      const text = document.getElementById("taskInput").value.trim();
       if (!text) return;
-      const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
-      tasks.push({ text, done: false });
-      localStorage.setItem("tasks", JSON.stringify(tasks));
-      taskInput.value = "";
-      loadTasks();
+      fetch(`${API_URL}?sheet=Tasks`).then(r=>r.json()).then(tasks=>{
+        tasks.push({ Task: text, Done: false });
+        saveTasks(tasks);
+        document.getElementById("taskInput").value = "";
+      });
     }
-    function toggleTask(index) {
-      const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
-      tasks[index].done = !tasks[index].done;
-      localStorage.setItem("tasks", JSON.stringify(tasks));
-      loadTasks();
+    function toggleTask(index, tasks) {
+      tasks[index].Done = tasks[index].Done === "TRUE" ? false : true;
+      saveTasks(tasks);
     }
-    function deleteTask(index) {
-      const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+    function deleteTask(index, tasks) {
       tasks.splice(index, 1);
-      localStorage.setItem("tasks", JSON.stringify(tasks));
-      loadTasks();
+      saveTasks(tasks);
     }
 
     // === BOOKMARKS ===
-    const bookmarkList = document.getElementById("bookmarkList");
-
-    function loadBookmarks() {
-      const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
+    async function loadBookmarks() {
+      const res = await fetch(`${API_URL}?sheet=Bookmarks`);
+      const bookmarks = await res.json();
+      const bookmarkList = document.getElementById("bookmarkList");
       bookmarkList.innerHTML = "";
       bookmarks.forEach((b, i) => {
         const li = document.createElement("li");
         const link = document.createElement("a");
-        link.href = b.url;
+        link.href = b.URL;
         link.target = "_blank";
-        link.textContent = b.name;
+        link.textContent = b.Name;
         const delBtn = document.createElement("button");
         delBtn.textContent = "✕";
         delBtn.className = "delete-btn";
-        delBtn.onclick = () => deleteBookmark(i);
+        delBtn.onclick = () => deleteBookmark(i, bookmarks);
         li.appendChild(link);
         li.appendChild(delBtn);
         bookmarkList.appendChild(li);
       });
     }
+    async function saveBookmarks(bookmarks) {
+      await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ sheet: "Bookmarks", data: bookmarks.map(b => ({ name: b.Name, url: b.URL })) })
+      });
+      loadBookmarks();
+    }
     function addBookmark() {
       const name = document.getElementById("bookmarkName").value.trim();
       const url = document.getElementById("bookmarkURL").value.trim();
       if (!name || !url) return;
-      const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
-      bookmarks.push({ name, url });
-      localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
-      document.getElementById("bookmarkName").value = "";
-      document.getElementById("bookmarkURL").value = "";
-      loadBookmarks();
+      fetch(`${API_URL}?sheet=Bookmarks`).then(r=>r.json()).then(bookmarks=>{
+        bookmarks.push({ Name: name, URL: url });
+        saveBookmarks(bookmarks);
+        document.getElementById("bookmarkName").value = "";
+        document.getElementById("bookmarkURL").value = "";
+      });
     }
-    function deleteBookmark(index) {
-      const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
+    function deleteBookmark(index, bookmarks) {
       bookmarks.splice(index, 1);
-      localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
-      loadBookmarks();
+      saveBookmarks(bookmarks);
     }
 
-    // Init
+    // === INIT ===
     loadTasks();
     loadBookmarks();
   </script>
